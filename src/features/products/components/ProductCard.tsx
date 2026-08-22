@@ -1,6 +1,7 @@
 import { Image } from "expo-image";
-import { memo } from "react";
-import { StyleSheet, View } from "react-native";
+import { useRouter } from "expo-router";
+import { memo, useCallback } from "react";
+import { Pressable, StyleSheet, View } from "react-native";
 
 import { ThemedText } from "@/components/ui/themed-text";
 import { Colors, Spacing } from "@/constants/theme";
@@ -9,20 +10,21 @@ import type { Product } from "../types";
 
 export const IMAGE_HEIGHT = 140;
 export const CARD_CONTENT_HEIGHT = 72;
-export const CARD_VERTICAL_GAP = Spacing.two;
-/** Full row height used by FlatList getItemLayout (image + content + gap). */
-export const PRODUCT_ROW_HEIGHT =
-  IMAGE_HEIGHT + CARD_CONTENT_HEIGHT + CARD_VERTICAL_GAP;
 
 type ProductCardProps = {
   product: Product;
 };
 
 function ProductCardComponent({ product }: ProductCardProps) {
+  const router = useRouter();
   const imageUri = product.thumbnail || product.images[0];
 
+  const onPress = useCallback(() => {
+    router.push(`/product/${product.id}`);
+  }, [product.id, router]);
+
   return (
-    <View style={styles.card}>
+    <Pressable style={styles.card} onPress={onPress}>
       <Image
         style={styles.image}
         source={imageUri ? { uri: imageUri } : undefined}
@@ -49,7 +51,7 @@ function ProductCardComponent({ product }: ProductCardProps) {
             : ""}
         </ThemedText>
       </View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -61,7 +63,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.light.backgroundElement,
     borderRadius: Spacing.two,
     overflow: "hidden",
-    marginBottom: CARD_VERTICAL_GAP,
+    marginBottom: Spacing.two,
   },
   image: {
     width: "100%",

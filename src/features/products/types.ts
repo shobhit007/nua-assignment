@@ -33,7 +33,11 @@ export interface Product {
   sku: string;
   weight: number;
   dimensions: ProductDimensions;
+  warrantyInformation: string;
+  shippingInformation: string;
+  availabilityStatus: string;
   reviews: ProductReview[];
+  returnPolicy: string;
   minimumOrderQuantity: number;
   meta: ProductMeta;
   images: string[];

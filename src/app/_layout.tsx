@@ -10,7 +10,8 @@ export default function TabLayout() {
         animation: "ios_from_right",
       }}
     >
-      <Stack.Screen name="/list" />
+      <Stack.Screen name="list" />
+      <Stack.Screen name="product/[id]" />
     </Stack>
   );
 }
