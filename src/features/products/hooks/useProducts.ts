@@ -5,9 +5,14 @@ import type { Product } from "../types";
 
 const PAGE_LIMIT = 20;
 
+type Loading = {
+  initial: boolean;
+  refresh: boolean;
+};
+
 type ProductsState = {
   products: Product[];
-  loading: boolean;
+  loading: Loading;
   loadingMore: boolean;
   error: string | null;
   skip: number;
@@ -25,11 +30,23 @@ type ProductsAction =
       total: number;
       append: boolean;
     }
-  | { type: "FETCH_ERROR"; error: string; append: boolean };
+  | { type: "FETCH_ERROR"; error: string; append: boolean }
+  | { type: "REFRESH" }
+  | {
+      type: "REFRESH_SUCCESS";
+      products: Product[];
+      skip: number;
+      limit: number;
+      total: number;
+    }
+  | { type: "REFRESH_ERROR"; error: string };
 
 const initialState: ProductsState = {
   products: [],
-  loading: true,
+  loading: {
+    initial: true,
+    refresh: false,
+  },
   loadingMore: false,
   error: null,
   skip: 0,
@@ -46,13 +63,15 @@ function productsReducer(
       return {
         ...state,
         error: null,
-        loading: action.append ? state.loading : true,
+        loading: action.append
+          ? state.loading
+          : { ...state.loading, initial: true },
         loadingMore: action.append,
       };
     case "FETCH_SUCCESS":
       return {
         ...state,
-        loading: false,
+        loading: { ...state.loading, initial: false },
         loadingMore: false,
         error: null,
         products: action.append
@@ -65,7 +84,30 @@ function productsReducer(
     case "FETCH_ERROR":
       return {
         ...state,
-        loading: false,
+        loading: { ...state.loading, initial: false },
+        loadingMore: false,
+        error: action.error,
+      };
+    case "REFRESH":
+      return {
+        ...state,
+        loading: { ...state.loading, refresh: true },
+      };
+    case "REFRESH_SUCCESS":
+      return {
+        ...state,
+        loading: { initial: false, refresh: false },
+        products: action.products,
+        loadingMore: false,
+        error: null,
+        skip: action.skip,
+        limit: action.limit,
+        total: action.total,
+      };
+    case "REFRESH_ERROR":
+      return {
+        ...state,
+        loading: { initial: false, refresh: false },
         loadingMore: false,
         error: action.error,
       };
@@ -112,7 +154,7 @@ export function useProducts() {
 
   const loadMore = useCallback(() => {
     const { loading, loadingMore, error, products, total } = state;
-    if (loading || loadingMore || error || products.length >= total) {
+    if (loading.initial || loadingMore || error || products.length >= total) {
       return;
     }
 
@@ -123,9 +165,35 @@ export function useProducts() {
     loadProducts(0, false);
   }, [loadProducts]);
 
+  const refreshProducts = useCallback(async () => {
+    const requestId = ++requestIdRef.current;
+    dispatch({ type: "REFRESH" });
+
+    try {
+      const data = await fetchProducts({ limit: PAGE_LIMIT });
+      if (requestId !== requestIdRef.current) return;
+
+      dispatch({
+        type: "REFRESH_SUCCESS",
+        products: data.products,
+        skip: data.skip,
+        limit: data.limit,
+        total: data.total,
+      });
+    } catch (error) {
+      if (requestId !== requestIdRef.current) return;
+
+      dispatch({
+        type: "REFRESH_ERROR",
+        error: "Failed to fetch products",
+      });
+    }
+  }, []);
+
   return {
     ...state,
     loadMore,
     retry,
+    refreshProducts,
   };
 }

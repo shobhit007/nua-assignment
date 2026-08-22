@@ -20,8 +20,16 @@ const NUM_COLUMNS = 2;
 const COLUMN_GAP = Spacing.two;
 
 export function ProductListScreen() {
-  const { products, loading, loadingMore, error, total, loadMore, retry } =
-    useProducts();
+  const {
+    products,
+    loading,
+    loadingMore,
+    error,
+    total,
+    loadMore,
+    retry,
+    refreshProducts,
+  } = useProducts();
 
   const keyExtractor = useCallback((item: Product) => String(item.id), []);
 
@@ -36,7 +44,7 @@ export function ProductListScreen() {
 
   const listEmpty = (
     <View style={styles.empty}>
-      {loading ? (
+      {loading.initial ? (
         <ActivityIndicator size="large" color={Colors.light.textSecondary} />
       ) : error ? (
         <>
@@ -86,6 +94,8 @@ export function ProductListScreen() {
           styles.listContent,
           products.length === 0 && styles.listContentEmpty,
         ]}
+        refreshing={loading.refresh}
+        onRefresh={refreshProducts}
         onEndReached={onEndReached}
         onEndReachedThreshold={0.4}
         ListEmptyComponent={listEmpty}
