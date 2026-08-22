@@ -13,6 +13,7 @@ import { ThemedText } from "@/components/ui/themed-text";
 import { Colors, Spacing } from "@/constants/theme";
 
 import { ProductCard } from "../components/ProductCard";
+import SearchBar from "../components/SearchBar";
 import { useProducts } from "../hooks/useProducts";
 import type { Product } from "../types";
 
@@ -83,6 +84,8 @@ export function ProductListScreen() {
           </ThemedText>
         ) : null}
       </View>
+
+      <SearchBar />
 
       <FlatList
         data={products}
