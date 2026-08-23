@@ -1,3 +1,5 @@
+import { useRouter } from "expo-router";
+import { ShoppingCart } from "lucide-react-native";
 import { useCallback } from "react";
 import {
   ActivityIndicator,
@@ -11,6 +13,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ThemedText } from "@/components/ui/themed-text";
 import { Colors, Spacing } from "@/constants/theme";
+import { useAppSelector } from "@/store/hooks";
+import { selectCartItemCount } from "@/store/slices/cartSlice";
 
 import { ProductCard } from "../components/ProductCard";
 import SearchBar from "../components/SearchBar";
@@ -21,6 +25,8 @@ const NUM_COLUMNS = 2;
 const COLUMN_GAP = Spacing.two;
 
 export function ProductListScreen() {
+  const router = useRouter();
+  const cartCount = useAppSelector(selectCartItemCount);
   const {
     products,
     loading,
@@ -96,12 +102,30 @@ export function ProductListScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
       <View style={styles.header}>
-        <ThemedText type="subtitle">Products</ThemedText>
-        {total > 0 && !loading.search ? (
-          <ThemedText type="small" style={styles.count}>
-            {products.length} of {total}
-          </ThemedText>
-        ) : null}
+        <View style={styles.headerLeft}>
+          <ThemedText type="subtitle">Products</ThemedText>
+          {total > 0 && !loading.search ? (
+            <ThemedText type="small" style={styles.count}>
+              {products.length} of {total}
+            </ThemedText>
+          ) : null}
+        </View>
+
+        <Pressable
+          style={styles.cartButton}
+          onPress={() => router.push("/cart")}
+          accessibilityLabel="Open cart"
+          hitSlop={8}
+        >
+          <ShoppingCart size={24} color={Colors.light.text} />
+          {cartCount > 0 ? (
+            <View style={styles.badge}>
+              <ThemedText type="smallBold" style={styles.badgeText}>
+                {cartCount > 99 ? "99+" : String(cartCount)}
+              </ThemedText>
+            </View>
+          ) : null}
+        </Pressable>
       </View>
 
       <SearchBar onSearch={search} />
@@ -158,11 +182,39 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.two,
     paddingBottom: Spacing.two,
     flexDirection: "row",
-    alignItems: "baseline",
+    alignItems: "flex-start",
     justifyContent: "space-between",
+  },
+  headerLeft: {
+    flex: 1,
+    gap: Spacing.half,
+    paddingRight: Spacing.two,
   },
   count: {
     color: Colors.light.textSecondary,
+  },
+  cartButton: {
+    width: 44,
+    height: 44,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  badge: {
+    position: "absolute",
+    top: 2,
+    right: 2,
+    minWidth: 18,
+    height: 18,
+    paddingHorizontal: 4,
+    borderRadius: 9,
+    backgroundColor: Colors.light.text,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  badgeText: {
+    color: Colors.light.background,
+    fontSize: 10,
+    lineHeight: 12,
   },
   searchLoading: {
     paddingBottom: Spacing.two,

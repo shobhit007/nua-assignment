@@ -21,6 +21,8 @@ import {
 
 import { ThemedText } from "@/components/ui/themed-text";
 import { Colors, Spacing } from "@/constants/theme";
+import { useAppDispatch } from "@/store/hooks";
+import { addToCart } from "@/store/slices/cartSlice";
 
 import { ArrowLeft } from "lucide-react-native";
 import { useProduct } from "../hooks/useProduct";
@@ -44,6 +46,7 @@ function formatDate(iso: string) {
 
 export function ProductDetailsScreen() {
   const router = useRouter();
+  const dispatch = useAppDispatch();
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ id: string }>();
   const productId = useMemo(() => {
@@ -90,8 +93,17 @@ export function ProductDetailsScreen() {
 
   const onAddToCart = useCallback(() => {
     if (!product) return;
+    dispatch(
+      addToCart({
+        id: product.id,
+        title: product.title,
+        thumbnail: product.thumbnail || product.images[0] || "",
+        price: product.price,
+        discountPercentage: product.discountPercentage,
+      }),
+    );
     Alert.alert("Added to cart", product.title);
-  }, [product]);
+  }, [dispatch, product]);
 
   if (loading && !product) {
     return (

@@ -1,7 +1,7 @@
 import { combineReducers } from "@reduxjs/toolkit";
 
-import appReducer from "./slices/appSlice";
+import cartReducer from "./slices/cartSlice";
 
 export const rootReducer = combineReducers({
-  app: appReducer,
+  cart: cartReducer,
 });
