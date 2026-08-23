@@ -4,8 +4,8 @@ A React Native product browsing as part of the Nua App Developer assessment.
 
 ## Demo
 
-- **Video Demo:** [text](https://drive.google.com/file/d/19bz0ns01fKNyLjJb_8yXjiIApLitJXSb/view?usp=sharing)
-- **Test APK:** [text](https://expo.dev/accounts/shobhitsaini79/projects/nua-assignment/builds/8984c7c5-15f6-430d-adc7-a6f312e89fd8)
+- **Video Demo:** [Demo video](https://drive.google.com/file/d/19bz0ns01fKNyLjJb_8yXjiIApLitJXSb/view?usp=sharing)
+- **Test APK:** [Test APK link](https://expo.dev/accounts/shobhitsaini79/projects/nua-assignment/builds/8984c7c5-15f6-430d-adc7-a6f312e89fd8)
 
 ## Features Implemented
 
