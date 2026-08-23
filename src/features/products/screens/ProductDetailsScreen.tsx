@@ -220,6 +220,17 @@ export function ProductDetailsScreen() {
             {product.description}
           </ThemedText>
 
+          <Pressable
+            style={styles.policyButton}
+            onPress={() => router.push("/return-policy")}
+            accessibilityRole="button"
+            accessibilityLabel="Return policy"
+          >
+            <ThemedText type="smallBold" style={styles.policyButtonLabel}>
+              Return Policy
+            </ThemedText>
+          </Pressable>
+
           <ThemedText type="default" style={styles.reviewsHeading}>
             Reviews ({product.reviews?.length ?? 0})
           </ThemedText>
@@ -358,6 +369,17 @@ const styles = StyleSheet.create({
   },
   description: {
     marginTop: Spacing.one,
+    color: Colors.light.text,
+  },
+  policyButton: {
+    marginTop: Spacing.two,
+    alignSelf: "flex-start",
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.two,
+    backgroundColor: Colors.light.backgroundElement,
+    borderRadius: Spacing.two,
+  },
+  policyButtonLabel: {
     color: Colors.light.text,
   },
   infoBlock: {

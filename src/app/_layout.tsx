@@ -20,7 +20,7 @@ export default function TabLayout() {
           <Stack.Screen name="list" />
           <Stack.Screen name="product/[id]" />
           <Stack.Screen name="cart" />
-        </Stack>
+          <Stack.Screen name="return-policy" />        </Stack>
       </PersistGate>
     </Provider>
   );
