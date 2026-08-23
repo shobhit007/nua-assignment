@@ -261,11 +261,14 @@ export function useProducts() {
         return;
       }
 
+      const requestId = ++requestIdRef.current;
       dispatch({ type: "SEARCH_START", query });
 
       try {
         // Stale search handling intentionally omitted for now.
         const data = await searchProducts({ q: query, limit: PAGE_LIMIT });
+
+        if (requestId !== requestIdRef.current) return;
 
         dispatch({
           type: "SEARCH_SUCCESS",
@@ -276,6 +279,7 @@ export function useProducts() {
           query,
         });
       } catch (error) {
+        if (requestId !== requestIdRef.current) return;
         dispatch({
           type: "SEARCH_ERROR",
           query,

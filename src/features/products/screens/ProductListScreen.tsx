@@ -102,7 +102,7 @@ export function ProductListScreen() {
 
       <SearchBar onSearch={search} />
 
-      {loading.search && products.length > 0 ? (
+      {(loading.search || loading.initial) && products.length > 0 ? (
         <View style={styles.searchLoading}>
           <ActivityIndicator color={Colors.light.textSecondary} />
         </View>

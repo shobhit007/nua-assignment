@@ -1,6 +1,6 @@
-import { Search } from "lucide-react-native";
+import { Search, X } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
-import { StyleSheet, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, TextInput, View } from "react-native";
 
 import { Colors, Spacing } from "@/constants/theme";
 
@@ -27,6 +27,8 @@ export default function SearchBar({ onSearch }: SearchBarProps) {
     return () => clearTimeout(timer);
   }, [search, onSearch]);
 
+  const handleClearSearch = () => setSearch("");
+
   return (
     <View style={styles.container}>
       <View style={styles.field}>
@@ -43,6 +45,12 @@ export default function SearchBar({ onSearch }: SearchBarProps) {
           autoCapitalize="none"
           selectionColor={Colors.light.text}
         />
+
+        {search && (
+          <Pressable onPress={handleClearSearch}>
+            <X size={20} color={Colors.light.text} />
+          </Pressable>
+        )}
       </View>
     </View>
   );
