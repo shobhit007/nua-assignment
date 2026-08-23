@@ -54,6 +54,7 @@ export interface ProductsResponse {
 export type FetchProductsParams = {
   skip?: number;
   limit?: number;
+  query?: string;
 };
 
 export type SearchProductsParams = {

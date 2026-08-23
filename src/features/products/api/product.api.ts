@@ -8,10 +8,13 @@ import type {
 export async function fetchProducts({
   skip = 0,
   limit = 10,
+  query,
 }: FetchProductsParams = {}): Promise<ProductsResponse> {
-  const response = await fetch(
-    `https://dummyjson.com/products?skip=${skip}&limit=${limit}`,
-  );
+  let url = `https://dummyjson.com/products?skip=${skip}&limit=${limit}`;
+  if (query) {
+    url = `https://dummyjson.com/products/search?q=${query}&skip=${skip}&limit=${limit}`;
+  }
+  const response = await fetch(url);
 
   if (!response.ok) {
     throw new Error(`Failed to fetch products (${response.status})`);

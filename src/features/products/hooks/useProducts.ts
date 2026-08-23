@@ -171,33 +171,36 @@ export function useProducts() {
   const [state, dispatch] = useReducer(productsReducer, initialState);
   const requestIdRef = useRef(0);
 
-  const loadProducts = useCallback(async (skip: number, append: boolean) => {
-    const requestId = ++requestIdRef.current;
-    dispatch({ type: "FETCH_START", append });
+  const loadProducts = useCallback(
+    async (skip: number, append: boolean, query?: string) => {
+      const requestId = ++requestIdRef.current;
+      dispatch({ type: "FETCH_START", append });
 
-    try {
-      const data = await fetchProducts({ skip, limit: PAGE_LIMIT });
-      if (requestId !== requestIdRef.current) return;
+      try {
+        const data = await fetchProducts({ skip, limit: PAGE_LIMIT, query });
+        if (requestId !== requestIdRef.current) return;
 
-      dispatch({
-        type: "FETCH_SUCCESS",
-        products: data.products,
-        skip: data.skip,
-        limit: data.limit,
-        total: data.total,
-        append,
-      });
-    } catch (error) {
-      if (requestId !== requestIdRef.current) return;
+        dispatch({
+          type: "FETCH_SUCCESS",
+          products: data.products,
+          skip: data.skip,
+          limit: data.limit,
+          total: data.total,
+          append,
+        });
+      } catch (error) {
+        if (requestId !== requestIdRef.current) return;
 
-      dispatch({
-        type: "FETCH_ERROR",
-        error:
-          error instanceof Error ? error.message : "Failed to fetch products",
-        append,
-      });
-    }
-  }, []);
+        dispatch({
+          type: "FETCH_ERROR",
+          error:
+            error instanceof Error ? error.message : "Failed to fetch products",
+          append,
+        });
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     loadProducts(0, false);
@@ -206,7 +209,6 @@ export function useProducts() {
   const loadMore = useCallback(() => {
     const { loading, loadingMore, error, products, total, query } = state;
     if (
-      query ||
       loading.initial ||
       loading.search ||
       loadingMore ||
@@ -216,7 +218,7 @@ export function useProducts() {
       return;
     }
 
-    loadProducts(products.length, true);
+    loadProducts(products.length, true, state.query);
   }, [loadProducts, state]);
 
   const retry = useCallback(() => {
