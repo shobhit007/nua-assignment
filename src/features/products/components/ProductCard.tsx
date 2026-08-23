@@ -59,7 +59,6 @@ export const ProductCard = memo(ProductCardComponent);
 
 const styles = StyleSheet.create({
   card: {
-    flex: 1,
     backgroundColor: Colors.light.backgroundElement,
     borderRadius: Spacing.two,
     overflow: "hidden",

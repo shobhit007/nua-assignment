@@ -39,7 +39,11 @@ export function ProductListScreen() {
   const keyExtractor = useCallback((item: Product) => String(item.id), []);
 
   const renderItem = useCallback<ListRenderItem<Product>>(
-    ({ item }) => <ProductCard product={item} />,
+    ({ item }) => (
+      <View style={styles.column}>
+        <ProductCard product={item} />
+      </View>
+    ),
     [],
   );
 
@@ -183,7 +187,11 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   columnWrapper: {
-    gap: COLUMN_GAP,
+    marginHorizontal: -COLUMN_GAP / 2,
+  },
+  column: {
+    width: "50%",
+    paddingHorizontal: COLUMN_GAP / 2,
   },
   empty: {
     flex: 1,
