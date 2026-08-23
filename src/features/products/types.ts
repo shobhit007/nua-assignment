@@ -55,3 +55,9 @@ export type FetchProductsParams = {
   skip?: number;
   limit?: number;
 };
+
+export type SearchProductsParams = {
+  q: string;
+  skip?: number;
+  limit?: number;
+};

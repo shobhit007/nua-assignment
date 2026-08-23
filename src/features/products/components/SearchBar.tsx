@@ -1,14 +1,39 @@
+import { Search } from "lucide-react-native";
+import { useEffect, useRef, useState } from "react";
 import { StyleSheet, TextInput, View } from "react-native";
 
 import { Colors, Spacing } from "@/constants/theme";
-import { Search } from "lucide-react-native";
 
-export default function SearchBar() {
+const DEBOUNCE_MS = 500;
+
+type SearchBarProps = {
+  onSearch: (query: string) => void;
+};
+
+export default function SearchBar({ onSearch }: SearchBarProps) {
+  const [search, setSearch] = useState("");
+  const isFirstRender = useRef(true);
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      onSearch(search);
+    }, DEBOUNCE_MS);
+
+    return () => clearTimeout(timer);
+  }, [search, onSearch]);
+
   return (
     <View style={styles.container}>
       <View style={styles.field}>
         <Search size={20} color={Colors.light.textSecondary} />
         <TextInput
+          value={search}
+          onChangeText={setSearch}
           style={styles.input}
           placeholder="Search products"
           placeholderTextColor={Colors.light.textSecondary}
@@ -36,11 +61,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.three,
     backgroundColor: Colors.light.backgroundElement,
     borderRadius: Spacing.two,
-  },
-  icon: {
-    color: Colors.light.textSecondary,
-    fontSize: 18,
-    lineHeight: 20,
   },
   input: {
     flex: 1,

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useReducer, useRef } from "react";
 
-import { fetchProducts } from "../api/product.api";
+import { fetchProducts, searchProducts } from "../api/product.api";
 import type { Product } from "../types";
 
 const PAGE_LIMIT = 20;
@@ -8,6 +8,7 @@ const PAGE_LIMIT = 20;
 type Loading = {
   initial: boolean;
   refresh: boolean;
+  search: boolean;
 };
 
 type ProductsState = {
@@ -15,6 +16,8 @@ type ProductsState = {
   loading: Loading;
   loadingMore: boolean;
   error: string | null;
+  searchError: string | null;
+  query: string;
   skip: number;
   limit: number;
   total: number;
@@ -39,16 +42,30 @@ type ProductsAction =
       limit: number;
       total: number;
     }
-  | { type: "REFRESH_ERROR"; error: string };
+  | { type: "REFRESH_ERROR"; error: string }
+  | { type: "SEARCH_START"; query: string }
+  | {
+      type: "SEARCH_SUCCESS";
+      products: Product[];
+      skip: number;
+      limit: number;
+      total: number;
+      query: string;
+    }
+  | { type: "SEARCH_ERROR"; error: string; query: string }
+  | { type: "SEARCH_CLEAR" };
 
 const initialState: ProductsState = {
   products: [],
   loading: {
     initial: true,
     refresh: false,
+    search: false,
   },
   loadingMore: false,
   error: null,
+  searchError: null,
+  query: "",
   skip: 0,
   limit: PAGE_LIMIT,
   total: 0,
@@ -96,7 +113,7 @@ function productsReducer(
     case "REFRESH_SUCCESS":
       return {
         ...state,
-        loading: { initial: false, refresh: false },
+        loading: { ...state.loading, initial: false, refresh: false },
         products: action.products,
         loadingMore: false,
         error: null,
@@ -107,9 +124,43 @@ function productsReducer(
     case "REFRESH_ERROR":
       return {
         ...state,
-        loading: { initial: false, refresh: false },
+        loading: { ...state.loading, initial: false, refresh: false },
         loadingMore: false,
         error: action.error,
+      };
+    case "SEARCH_START":
+      return {
+        ...state,
+        query: action.query,
+        searchError: null,
+        loading: { ...state.loading, search: true },
+      };
+    case "SEARCH_SUCCESS":
+      return {
+        ...state,
+        query: action.query,
+        products: action.products,
+        skip: action.skip,
+        limit: action.limit,
+        total: action.total,
+        loading: { ...state.loading, search: false },
+        searchError: null,
+        loadingMore: false,
+        error: null,
+      };
+    case "SEARCH_ERROR":
+      return {
+        ...state,
+        query: action.query,
+        loading: { ...state.loading, search: false },
+        searchError: action.error,
+      };
+    case "SEARCH_CLEAR":
+      return {
+        ...state,
+        query: "",
+        searchError: null,
+        loading: { ...state.loading, search: false },
       };
     default:
       return state;
@@ -153,8 +204,15 @@ export function useProducts() {
   }, [loadProducts]);
 
   const loadMore = useCallback(() => {
-    const { loading, loadingMore, error, products, total } = state;
-    if (loading.initial || loadingMore || error || products.length >= total) {
+    const { loading, loadingMore, error, products, total, query } = state;
+    if (
+      query ||
+      loading.initial ||
+      loading.search ||
+      loadingMore ||
+      error ||
+      products.length >= total
+    ) {
       return;
     }
 
@@ -166,6 +224,8 @@ export function useProducts() {
   }, [loadProducts]);
 
   const refreshProducts = useCallback(async () => {
+    if (state.query) return;
+
     const requestId = ++requestIdRef.current;
     dispatch({ type: "REFRESH" });
 
@@ -185,15 +245,61 @@ export function useProducts() {
 
       dispatch({
         type: "REFRESH_ERROR",
-        error: "Failed to fetch products",
+        error:
+          error instanceof Error ? error.message : "Failed to fetch products",
       });
     }
-  }, []);
+  }, [state.query]);
+
+  const search = useCallback(
+    async (rawQuery: string) => {
+      const query = rawQuery.trim();
+
+      if (!query) {
+        dispatch({ type: "SEARCH_CLEAR" });
+        loadProducts(0, false);
+        return;
+      }
+
+      dispatch({ type: "SEARCH_START", query });
+
+      try {
+        // Stale search handling intentionally omitted for now.
+        const data = await searchProducts({ q: query, limit: PAGE_LIMIT });
+
+        dispatch({
+          type: "SEARCH_SUCCESS",
+          products: data.products,
+          skip: data.skip,
+          limit: data.limit,
+          total: data.total,
+          query,
+        });
+      } catch (error) {
+        dispatch({
+          type: "SEARCH_ERROR",
+          query,
+          error:
+            error instanceof Error
+              ? error.message
+              : "Failed to search products",
+        });
+      }
+    },
+    [loadProducts],
+  );
+
+  const retrySearch = useCallback(() => {
+    if (!state.query) return;
+    search(state.query);
+  }, [search, state.query]);
 
   return {
     ...state,
     loadMore,
     retry,
     refreshProducts,
+    search,
+    retrySearch,
   };
 }

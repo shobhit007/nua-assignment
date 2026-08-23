@@ -26,10 +26,14 @@ export function ProductListScreen() {
     loading,
     loadingMore,
     error,
+    searchError,
+    query,
     total,
     loadMore,
     retry,
     refreshProducts,
+    search,
+    retrySearch,
   } = useProducts();
 
   const keyExtractor = useCallback((item: Product) => String(item.id), []);
@@ -45,8 +49,19 @@ export function ProductListScreen() {
 
   const listEmpty = (
     <View style={styles.empty}>
-      {loading.initial ? (
+      {loading.initial || loading.search ? (
         <ActivityIndicator size="large" color={Colors.light.textSecondary} />
+      ) : searchError ? (
+        <>
+          <ThemedText type="default" style={styles.emptyText}>
+            {searchError}
+          </ThemedText>
+          <Pressable style={styles.retryButton} onPress={retrySearch}>
+            <ThemedText type="smallBold" style={styles.retryLabel}>
+              Retry search
+            </ThemedText>
+          </Pressable>
+        </>
       ) : error ? (
         <>
           <ThemedText type="default" style={styles.emptyText}>
@@ -60,7 +75,7 @@ export function ProductListScreen() {
         </>
       ) : (
         <ThemedText type="default" style={styles.emptyText}>
-          No products found
+          {query ? "No products match your search" : "No products found"}
         </ThemedText>
       )}
     </View>
@@ -78,14 +93,33 @@ export function ProductListScreen() {
     <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
       <View style={styles.header}>
         <ThemedText type="subtitle">Products</ThemedText>
-        {total > 0 ? (
+        {total > 0 && !loading.search ? (
           <ThemedText type="small" style={styles.count}>
             {products.length} of {total}
           </ThemedText>
         ) : null}
       </View>
 
-      <SearchBar />
+      <SearchBar onSearch={search} />
+
+      {loading.search && products.length > 0 ? (
+        <View style={styles.searchLoading}>
+          <ActivityIndicator color={Colors.light.textSecondary} />
+        </View>
+      ) : null}
+
+      {searchError && products.length > 0 ? (
+        <View style={styles.searchErrorBanner}>
+          <ThemedText type="small" style={styles.emptyText}>
+            {searchError}
+          </ThemedText>
+          <Pressable onPress={retrySearch}>
+            <ThemedText type="smallBold" style={styles.retryLabel}>
+              Retry
+            </ThemedText>
+          </Pressable>
+        </View>
+      ) : null}
 
       <FlatList
         data={products}
@@ -125,6 +159,21 @@ const styles = StyleSheet.create({
   },
   count: {
     color: Colors.light.textSecondary,
+  },
+  searchLoading: {
+    paddingBottom: Spacing.two,
+    alignItems: "center",
+  },
+  searchErrorBanner: {
+    marginHorizontal: Spacing.three,
+    marginBottom: Spacing.two,
+    padding: Spacing.two,
+    borderRadius: Spacing.two,
+    backgroundColor: Colors.light.backgroundElement,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: Spacing.two,
   },
   listContent: {
     paddingHorizontal: Spacing.three,

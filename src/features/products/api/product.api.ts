@@ -1,4 +1,9 @@
-import type { FetchProductsParams, Product, ProductsResponse } from "../types";
+import type {
+  FetchProductsParams,
+  Product,
+  ProductsResponse,
+  SearchProductsParams,
+} from "../types";
 
 export async function fetchProducts({
   skip = 0,
@@ -10,6 +15,27 @@ export async function fetchProducts({
 
   if (!response.ok) {
     throw new Error(`Failed to fetch products (${response.status})`);
+  }
+
+  return response.json();
+}
+
+export async function searchProducts({
+  q,
+  skip = 0,
+  limit = 10,
+}: SearchProductsParams): Promise<ProductsResponse> {
+  const params = new URLSearchParams({
+    q,
+    skip: String(skip),
+    limit: String(limit),
+  });
+  const response = await fetch(
+    `https://dummyjson.com/products/search?${params.toString()}`,
+  );
+
+  if (!response.ok) {
+    throw new Error(`Failed to search products (${response.status})`);
   }
 
   return response.json();
