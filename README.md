@@ -1,56 +1,111 @@
-# Welcome to your Expo app 👋
+# Nua App Developer Assessment
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A React Native product browsing as part of the Nua App Developer assessment.
 
-## Get started
+## Demo
 
-1. Install dependencies
+- **Video Demo:** [text](https://drive.google.com/file/d/19bz0ns01fKNyLjJb_8yXjiIApLitJXSb/view?usp=sharing)
+- **Test APK:** [text](https://expo.dev/accounts/shobhitsaini79/projects/nua-assignment/builds/8984c7c5-15f6-430d-adc7-a6f312e89fd8)
 
-   ```bash
-   npm install
-   ```
+## Features Implemented
 
-2. Start the app
+### Product Listing
 
-   ```bash
-   npx expo start
-   ```
+- Product listing using React Native `FlatList`
+- Two-column product grid
+- Pagination with infinite scrolling
+- Pagination loading and error states
+- Empty state handling
+- Pull-to-refresh
 
-In the output, you'll find options to open the app in a
+### Product Search
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+- Search products using the DummyJSON search API
+- Debounced search input to avoid unnecessary API requests
+- Search results pagination
+- Empty search-result state
+- Search loading and error handling
+- Stale-response protection using request IDs to prevent older asynchronous responses from overwriting newer search results
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+### Product Details
 
-## Get a fresh project
+- Product detail screen
+- Product image carousel
+- Product title, description, rating and pricing information
+- Discount percentage and discounted price calculation
+- Add-to-cart functionality
 
-When you're ready, run:
+### Cart
+
+- Add products to cart
+- Increase/decrease product quantity
+- Remove products from cart
+- Calculate cart subtotal
+- Persist cart data using `AsyncStorage`
+- Restore persisted cart when the application starts
+
+### Return Policy
+
+- Return Policy screen
+- Return Policy page rendered using `WebView`
+
+### Analytics
+
+Firebase Analytics events implemented for:
+
+- `product_viewed`
+- `add_to_cart`
+- `search_performed`
+- `app_backgrounded`
+
+## Technical Implementation
+
+### Product Listing State
+
+Product listing state is handled locally using React's `useReducer`.
+
+The reducer manages:
+
+- Products
+- Pagination state
+- Loading states
+- Error states
+- Search state
+- Request generation for stale-response protection
+
+Derived values such as whether more products are available are calculated from the existing state instead of being stored separately.
+
+### Search Request Handling
+
+Search uses a debounce mechanism so that API requests are only made after the user stops typing.
+
+Because debouncing alone does not guarantee that API responses will arrive in the same order as requests, each search request receives a request ID.
+
+When a response arrives, its request ID is compared with the latest request ID. Stale responses are ignored instead of updating the current product state.
+
+### List Performance
+
+The product list uses React Native's virtualized `FlatList`.
+
+Performance considerations include:
+
+- `React.memo` for product cards
+- Stable product keys
+- Fixed product card dimensions
+- Controlled rendering through FlatList virtualization
+- Stable pagination footer layout
+- Avoiding unnecessary list state updates
+
+The pagination footer keeps a consistent height while the loading indicator is shown/hidden. This prevents the scrollable content height from changing when pagination completes and avoids visible scroll-position shifts.
+
+## Project Structure
+
+The implementation is organized around feature responsibilities, with product listing/search logic separated from UI components and cart state handled independently.
+
+## Getting Started
+
+### Install dependencies
 
 ```bash
-npm run reset-project
+npm install
 ```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-### Other setup steps
-
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
