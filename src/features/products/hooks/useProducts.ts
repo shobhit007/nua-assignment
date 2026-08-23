@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useReducer, useRef } from "react";
 
+import { logAnalytics } from "@/features/analytics/logAnalytics";
+
 import { fetchProducts, searchProducts } from "../api/product.api";
 import type { Product } from "../types";
 
@@ -279,6 +281,14 @@ export function useProducts() {
           limit: data.limit,
           total: data.total,
           query,
+        });
+
+        logAnalytics({
+          name: "search_performed",
+          payload: {
+            query,
+            resultCount: data.total,
+          },
         });
       } catch (error) {
         if (requestId !== requestIdRef.current) return;

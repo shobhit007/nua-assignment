@@ -1,6 +1,6 @@
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -21,6 +21,7 @@ import {
 
 import { ThemedText } from "@/components/ui/themed-text";
 import { Colors, Spacing } from "@/constants/theme";
+import { logAnalytics } from "@/features/analytics/logAnalytics";
 import { useAppDispatch } from "@/store/hooks";
 import { addToCart } from "@/store/slices/cartSlice";
 
@@ -56,6 +57,17 @@ export function ProductDetailsScreen() {
 
   const { product, loading, error, retry } = useProduct(productId);
   const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    if (!product) return;
+    logAnalytics({
+      name: "product_viewed",
+      payload: {
+        productId: product.id,
+        title: product.title,
+      },
+    });
+  }, [product?.id]);
 
   const images = useMemo(() => {
     if (!product) return [];
@@ -102,6 +114,13 @@ export function ProductDetailsScreen() {
         discountPercentage: product.discountPercentage,
       }),
     );
+    logAnalytics({
+      name: "add_to_cart",
+      payload: {
+        productId: product.id,
+        title: product.title,
+      },
+    });
     Alert.alert("Added to cart", product.title);
   }, [dispatch, product]);
 

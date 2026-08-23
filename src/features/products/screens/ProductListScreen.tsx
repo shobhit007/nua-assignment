@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { ShoppingCart } from "lucide-react-native";
+import { ChartNoAxesColumn, ShoppingCart } from "lucide-react-native";
 import { useCallback } from "react";
 import {
   ActivityIndicator,
@@ -111,21 +111,32 @@ export function ProductListScreen() {
           ) : null}
         </View>
 
-        <Pressable
-          style={styles.cartButton}
-          onPress={() => router.push("/cart")}
-          accessibilityLabel="Open cart"
-          hitSlop={8}
-        >
-          <ShoppingCart size={24} color={Colors.light.text} />
-          {cartCount > 0 ? (
-            <View style={styles.badge}>
-              <ThemedText type="smallBold" style={styles.badgeText}>
-                {cartCount > 99 ? "99+" : String(cartCount)}
-              </ThemedText>
-            </View>
-          ) : null}
-        </Pressable>
+        <View style={styles.headerActions}>
+          <Pressable
+            style={styles.iconButton}
+            onPress={() => router.push("/analytics")}
+            accessibilityLabel="Open analytics"
+            hitSlop={8}
+          >
+            <ChartNoAxesColumn size={24} color={Colors.light.text} />
+          </Pressable>
+
+          <Pressable
+            style={styles.iconButton}
+            onPress={() => router.push("/cart")}
+            accessibilityLabel="Open cart"
+            hitSlop={8}
+          >
+            <ShoppingCart size={24} color={Colors.light.text} />
+            {cartCount > 0 ? (
+              <View style={styles.badge}>
+                <ThemedText type="smallBold" style={styles.badgeText}>
+                  {cartCount > 99 ? "99+" : String(cartCount)}
+                </ThemedText>
+              </View>
+            ) : null}
+          </Pressable>
+        </View>
       </View>
 
       <SearchBar onSearch={search} />
@@ -193,7 +204,12 @@ const styles = StyleSheet.create({
   count: {
     color: Colors.light.textSecondary,
   },
-  cartButton: {
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.one,
+  },
+  iconButton: {
     width: 44,
     height: 44,
     alignItems: "center",
